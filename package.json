@@ -1,34 +1,13 @@
 {
-  "name": "youtubex",
+  "name": "youtube-upload-api",
   "version": "1.0.0",
-  "description": "Backend to upload videos to YouTube using YouTube Data API v3.",
-  "main": "api/auth.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node api/auth.js",
-    "dev": "nodemon api/auth.js"
+    "start": "node api/upload.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "googleapis": "^118.0.0",
-    "dotenv": "^16.3.1",
-    "fs": "0.0.1-security",
-    "path": "^0.12.7"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "keywords": [
-    "youtube",
-    "googleapis",
-    "youtube-data-api",
-    "nodejs",
-    "vercel",
-    "heroku",
-    "backend"
-  ],
-  "author": "Mas Davin",
-  "license": "MIT"
+    "express": "^4.17.3",
+    "googleapis": "^91.0.0",
+    "dotenv": "^16.0.3"
+  }
 }
