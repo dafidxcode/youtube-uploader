@@ -1,23 +1,28 @@
-const { google } = require("googleapis");
-const fs = require("fs");
+require('dotenv').config();
+const express = require('express');
+const { google } = require('googleapis');
+const fs = require('fs');
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
-  `${process.env.BASE_URL}/api/oauth2callback`
-);
+const router = express.Router();
 
-export default async function handler(req, res) {
+router.get('/api/oauth2callback', async (req, res) => {
+  const auth = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    `${process.env.BASE_URL}/api/oauth2callback`
+  );
+
+  const { code } = req.query;
+
   try {
-    const code = req.query.code;
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
+    const { tokens } = await auth.getToken(code);
+    auth.setCredentials(tokens);
 
-    // Simpan token ke storage sementara (tidak permanen di Vercel)
-    fs.writeFileSync("/tmp/tokens.json", JSON.stringify(tokens));
-    res.send("Authentication successful! You can now upload videos.");
+    fs.writeFileSync('tokens.json', JSON.stringify(tokens));
+    res.send('Authentication successful! Tokens saved.');
   } catch (error) {
-    console.error("Error during authentication:", error);
-    res.status(500).send("Authentication failed.");
+    res.status(500).send('Error authenticating');
   }
-}
+});
+
+module.exports = router;
