@@ -1,51 +1,39 @@
-const { google } = require("googleapis");
-const fs = require("fs");
-const path = require("path");
+require('dotenv').config();
+const { google } = require('googleapis');
+const express = require('express');
+const router = express.Router();
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
-  `${process.env.BASE_URL}/api/oauth2callback`
-);
+router.post('/api/upload', async (req, res) => {
+  const auth = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    `${process.env.BASE_URL}/api/oauth2callback`
+  );
+  
+  // Simulasi upload video ke YouTube
+  const youtube = google.youtube({ version: 'v3', auth });
 
-export default async function handler(req, res) {
-  if (req.method === "POST") {
-    try {
-      const { title, description, videoPath } = req.body;
-
-      // Cek apakah token tersedia
-      const tokensPath = "/tmp/tokens.json";
-      if (!fs.existsSync(tokensPath)) {
-        return res.status(400).send("You must authenticate first.");
-      }
-
-      const tokens = JSON.parse(fs.readFileSync(tokensPath));
-      oauth2Client.setCredentials(tokens);
-
-      const youtube = google.youtube({ version: "v3", auth: oauth2Client });
-
-      const response = await youtube.videos.insert({
-        part: "snippet,status",
-        requestBody: {
-          snippet: {
-            title: title,
-            description: description,
-          },
-          status: {
-            privacyStatus: "private",
-          },
+  try {
+    const response = await youtube.videos.insert({
+      part: 'snippet,status',
+      requestBody: {
+        snippet: {
+          title: 'Test Upload',
+          description: 'Video uploaded via Node.js API',
         },
-        media: {
-          body: fs.createReadStream(path.resolve(videoPath)),
+        status: {
+          privacyStatus: 'private',
         },
-      });
-
-      res.status(200).send(`Video uploaded successfully! Video ID: ${response.data.id}`);
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      res.status(500).send("Error uploading video.");
-    }
-  } else {
-    res.status(405).send("Method Not Allowed");
+      },
+      media: {
+        mimeType: 'video/mp4',
+        body: req.files.video, // Pastikan input video benar
+      },
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-        }
+});
+
+module.exports = router;
