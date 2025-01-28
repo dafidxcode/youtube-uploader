@@ -1,16 +1,21 @@
-const { google } = require("googleapis");
+require('dotenv').config();
+const express = require('express');
+const { google } = require('googleapis');
+const router = express.Router();
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
-  `${process.env.BASE_URL}/api/oauth2callback`
-);
+router.get('/api/auth', (req, res) => {
+  const auth = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    `${process.env.BASE_URL}/api/oauth2callback`
+  );
 
-export default function handler(req, res) {
-  const scopes = ["https://www.googleapis.com/auth/youtube.upload"];
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: scopes,
+  const authUrl = auth.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['https://www.googleapis.com/auth/youtube.upload'],
   });
+
   res.redirect(authUrl);
-}
+});
+
+module.exports = router;
